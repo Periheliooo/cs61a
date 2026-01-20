@@ -77,7 +77,7 @@ def summation_using_accumulate(n, term):
     >>> [type(x).__name__ for x in ast.parse(inspect.getsource(summation_using_accumulate)).body[0].body]
     ['Expr', 'Return']
     """
-    return multiply(term(n), accumulate(add, 1, n - 1, term))
+    return mul(term(n), accumulate(add, 1, n - 1, term))
 
 
 def product_using_accumulate(n, term):
@@ -94,7 +94,7 @@ def product_using_accumulate(n, term):
     """
     return accumulate(mul, 1, n, term)
 
-
+#attention
 def make_repeater(f, n):
     """Returns the function that computes the nth application of f.
 
