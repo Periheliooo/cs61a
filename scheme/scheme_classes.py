@@ -42,7 +42,7 @@ class Frame:
         raise SchemeError('unknown identifier: {0}'.format(symbol))
 
 
-    def make_child_frame(self, formals, vals):
+    def make_child_frame(self, formals, vals):    # formals和vals均为Pair
         """Return a new local frame whose parent is SELF, in which the symbols
         in a Scheme list of formal parameters FORMALS are bound to the Scheme
         values in the Scheme list VALS. Both FORMALS and VALS are represented
@@ -57,6 +57,11 @@ class Frame:
             raise SchemeError('Incorrect number of arguments to function call')
         # BEGIN PROBLEM 8
         "*** YOUR CODE HERE ***"
+        child = Frame(self)
+        while formals is not nil:
+            child.define(formals.first, vals.first)
+            formals, vals = formals.rest, vals.rest
+        return child
         # END PROBLEM 8
 
 ##############
@@ -80,7 +85,7 @@ class BuiltinProcedure(Procedure):
 class LambdaProcedure(Procedure):
     """A procedure defined by a lambda expression or a define form."""
 
-    def __init__(self, formals, body, env):
+    def __init__(self, formals, body, env):    # formals和body均为Pair 
         """A procedure with formal parameter list FORMALS (a Scheme list),
         whose body is the Scheme list BODY, and whose parent environment
         starts with Frame ENV."""

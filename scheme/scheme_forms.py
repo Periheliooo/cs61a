@@ -32,17 +32,45 @@ def do_define_form(expressions, env):
     """
     validate_form(expressions, 2) # Checks that expressions is a list of length at least 2
     signature = expressions.first
-    if scheme_symbolp(signature):
+    if scheme_symbolp(signature):    # 接收单个
         # assigning a name to a value e.g. (define x (+ 1 2))
         validate_form(expressions, 2, 2) # Checks that expressions is a list of length exactly 2
         # BEGIN PROBLEM 4
         "*** YOUR CODE HERE ***"
+        # print("DEBUG:",expressions.rest)
+        value = scheme_eval(expressions.rest.first, env)
+        # print("DEBUG:" ,value)
+        env.define(signature, value)
+        return signature
         # END PROBLEM 4
-    elif isinstance(signature, Pair) and scheme_symbolp(signature.first):
+    elif isinstance(signature, Pair) and scheme_symbolp(signature.first):    # 接受f
+        '''
+        
         # defining a named procedure e.g. (define (f x y) (+ x y))
         # BEGIN PROBLEM 10
         "*** YOUR CODE HERE ***"
+        symbol = signature.first
+        formals = signature.rest
+        body = expressions.rest
+        lambda_expression = Pair('lambda', Pair(formals, body))
+        define_expression = Pair(symbol, Pair(lambda_expression, nil))    # value_exp = expressions.rest.first  # 获取变量的值 (lambda ...) 所以lambda外面还有一层pair
+        return do_define_form(define_expression, env)
         # END PROBLEM 10
+        '''
+        symbol = signature.first
+        formals = signature.rest
+        body = expressions.rest
+        
+        # 直接创建 LambdaProcedure 实例
+        # 注意：这里直接用当前环境 env 作为 Lambda 的父环境
+        procedure = do_lambda_form(Pair(formals, body), env)
+        
+        # 将符号绑定到这个新过程
+        env.define(symbol, procedure)
+        
+        # 返回符号
+        return symbol
+
     else:
         bad_signature = signature.first if isinstance(signature, Pair) else signature
         raise SchemeError('non-symbol: {0}'.format(bad_signature))
@@ -57,6 +85,7 @@ def do_quote_form(expressions, env):
     validate_form(expressions, 1, 1)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    return expressions.first
     # END PROBLEM 5
 
 def do_begin_form(expressions, env):
@@ -83,6 +112,8 @@ def do_lambda_form(expressions, env):
     validate_formals(formals)
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    body = expressions.rest
+    return LambdaProcedure(formals, body, env)
     # END PROBLEM 7
 
 def do_if_form(expressions, env):
@@ -220,6 +251,8 @@ def do_mu_form(expressions, env):
     validate_formals(formals)
     # BEGIN PROBLEM 11
     "*** YOUR CODE HERE ***"
+    body = expressions.rest
+    return MuProcedure(formals, body)
     # END PROBLEM 11
 
 

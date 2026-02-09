@@ -10,7 +10,7 @@ import scheme_forms
 # Eval/Apply #
 ##############
 
-def scheme_eval(expr, env, _=None): # Optional third argument is ignored
+def scheme_eval(expr, env, _=None): # Optional third argument is ignored    # 只能处理单一表达式
     """Evaluate Scheme expression EXPR in Frame ENV.
 
     >>> expr = read_line('(+ 2 2)')
@@ -19,7 +19,7 @@ def scheme_eval(expr, env, _=None): # Optional third argument is ignored
     >>> scheme_eval(expr, create_global_frame())
     4
     """
-    # Evaluate atoms
+    # Evaluate atoms    单个
     if scheme_symbolp(expr):
         return env.lookup(expr)
     elif self_evaluating(expr):
@@ -29,14 +29,18 @@ def scheme_eval(expr, env, _=None): # Optional third argument is ignored
     if not scheme_listp(expr):
         raise SchemeError('malformed list: {0}'.format(repl_str(expr)))
     first, rest = expr.first, expr.rest
-    if scheme_symbolp(first) and first in scheme_forms.SPECIAL_FORMS:
+    if scheme_symbolp(first) and first in scheme_forms.SPECIAL_FORMS:    # 特殊符号开头
         return scheme_forms.SPECIAL_FORMS[first](rest, env)
     else:
         # BEGIN PROBLEM 3
         "*** YOUR CODE HERE ***"
+        operator = first
+        procedure = scheme_eval(operator, env)
+        oprands = rest.map(lambda x: scheme_eval(x, env))
+        return scheme_apply(procedure, oprands, env)    # 参数已经是算好了的值
         # END PROBLEM 3
 
-def scheme_apply(procedure, args, env):
+def scheme_apply(procedure, args, env):   # procedure是procedure实例 args是Pair env是Frame实例
     """Apply Scheme PROCEDURE to argument values ARGS (a Scheme list) in
     Frame ENV, the current environment."""
     validate_procedure(procedure)
@@ -45,9 +49,9 @@ def scheme_apply(procedure, args, env):
     if isinstance(procedure, BuiltinProcedure):
         # BEGIN PROBLEM 2
         "*** YOUR CODE HERE ***"
-        args_list = []
+        args_list = []    # 将args转化为list
         while args is not nil:
-            args_list.append(scheme_eval(args.first, env))
+            args_list.append(args.first)
             args = args.rest
         # END PROBLEM 2
         try:
@@ -60,15 +64,19 @@ def scheme_apply(procedure, args, env):
     elif isinstance(procedure, LambdaProcedure):
         # BEGIN PROBLEM 9
         "*** YOUR CODE HERE ***"
+        lambda_frame = procedure.env.make_child_frame(procedure.formals, args)
+        return eval_all(procedure.body, lambda_frame)
         # END PROBLEM 9
     elif isinstance(procedure, MuProcedure):
         # BEGIN PROBLEM 11
         "*** YOUR CODE HERE ***"
+        mu_frame = env.make_child_frame(procedure.formals, args)
+        return eval_all(procedure.body, mu_frame)
         # END PROBLEM 11
     else:
         assert False, "Unexpected procedure: {}".format(procedure)
 
-def eval_all(expressions, env):
+def eval_all(expressions, env):    # 处理一串表达式，返回最后一个表达式的值
     """Evaluate each expression in the Scheme list EXPRESSIONS in
     Frame ENV (the current environment) and return the value of the last.
 
@@ -84,7 +92,15 @@ def eval_all(expressions, env):
     2
     """
     # BEGIN PROBLEM 6
-    return scheme_eval(expressions.first, env) # replace this with lines of your own code
+    # return scheme_eval(expressions.first, env) # replace this with lines of your own code
+    if expressions is nil:
+        return None
+    else:
+        if expressions.rest is nil:
+            return scheme_eval(expressions.first, env)
+        else:
+            scheme_eval(expressions.first, env)
+            return eval_all(expressions.rest, env)
     # END PROBLEM 6
 
 
